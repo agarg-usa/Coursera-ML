@@ -39,33 +39,33 @@ def calcJ(w,b,x,y): # calculate the cost of the entire model
 	sum = 0
 	for i in range(numOfTrainingExamples):
 		sum += (calcF(w,b,x[i]) - y[i])**2 # calculates square cost fn
-	sum *= (1/2*numOfTrainingExamples) # takes the average with respect to the # of training ex
+	sum /= 2*numOfTrainingExamples # takes the average with respect to the # of training ex
 	return sum
 
 def calcdJ_db(w,b,x,y): # calc dJ/db (partial with respect to the basis of cost fn)
 	sum = 0
 	for i in range(numOfTrainingExamples):
 		sum += calcF(w,b,x[i]) - y[i]
-	sum *= 1/numOfTrainingExamples
+	sum /= numOfTrainingExamples
 	return sum
 
 def calcdJ_dW(w,b,x,y): # calc dJ/dw, returns vector for w1 -> wn of their dJ/dwi
-	# the way to get dJ/dwi can be simplified to:
-	# dJ/db * wi
-	dJ_db = calcdJ_db(w,b,x,y)
 	dJ_dW = np.zeros(numOfFeatures) # remember W is a vector of # of features length (n)
-	for i in range(numOfFeatures):
-		dJ_dW[i] = dJ_db*w[i]
+	for j in range(numOfFeatures):
+		for i in range(numOfTrainingExamples):
+			dJ_dW[j] += (calcF(w,b,x[i]) - y[i])*x[i][j]
+		dJ_dW[j] /= numOfTrainingExamples
 	return dJ_dW
 
 # step_size = 5.0e-7
-step_size = 0.000001
+step_size = 5.0e-7
 def calcGradDescent(w,b,x,y):
 	w_new = w - step_size * calcdJ_dW(w,b,x,y)
 	b_new = b - step_size * calcdJ_db(w,b,x,y)
 	return (w_new, b_new)
 
-iterations = 100000
+iterations = 100001
+# iterations = 100
 
 w = w_init
 b = b_init
@@ -74,7 +74,7 @@ print(f"W = {w} , b = {b}")
 
 for i in range(iterations):
 	w,b = calcGradDescent(w,b,x_train,y_train)
-	if i % 10000 == 0:
+	if i % 50000 == 0:
 		print(f"Iteration #{i}: Current Cost = {calcJ(w,b,x_train, y_train)}")
 
 print(f"W = {w} , b = {b}")
